@@ -1,0 +1,95 @@
+# Terraform files
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Jenkins files
+jenkins/workspace/
+jenkins/jobs/*/workspace/
+jenkins/jobs/*/builds/
+*.log
+.jenkins/
+
+# AWS credentials
+.aws/credentials
+.aws/config
+aws-credentials.json
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.sublime-project
+*.sublime-workspace
+
+# Python files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Node.js files
+node_modules/
+npm-debug.log
+yarn-error.log
+.npm
+
+# Docker files
+.dockerignore
+docker-compose.override.yml
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+*.swp
+*.swo
+*~
+.directory
+ehthumbs.db
+desktop.ini
+
+# Monitoring files
+monitoring/logs/
+monitoring/*.log
+
+# Application files
+app/node_modules/
+app/dist/
+app/build/
+app/.env.local
+
+# Misc
+.cache/
+temp/
+tmp/
+*.bak
+*.backup
+.history/
+**/
