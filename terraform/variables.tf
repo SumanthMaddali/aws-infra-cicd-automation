@@ -18,7 +18,7 @@ variable "key_name" {
   default = "devops-project-key"
 }
 
-variable "publick_key_path" {
+variable "public_key_path" {
   description = "Path to your local puclic key"
   default = "~/.ssh/devops-project-key.pub"
 }
