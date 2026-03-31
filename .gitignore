@@ -1,6 +1,6 @@
-# Terraform files
-.terraform/
-.terraform.lock.hcl
+# Terraform - only ignore generated files, not .tf source files
+**/.terraform/
+**/.terraform.lock.hcl
 *.tfstate
 *.tfstate.*
 *.tfvars
@@ -13,50 +13,32 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
-# Jenkins files
+# Jenkins
 jenkins/workspace/
 jenkins/jobs/*/workspace/
 jenkins/jobs/*/builds/
-*.log
 .jenkins/
 
-# AWS credentials
+# AWS credentials - never commit these!
 .aws/credentials
 .aws/config
 aws-credentials.json
 
-# IDE and Editor files
+# IDE
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db
-*.sublime-project
-*.sublime-workspace
 
-# Python files
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
-*.egg-info/
-dist/
-build/
-
-# Node.js files
+# Node.js
 node_modules/
+app/node_modules/
 npm-debug.log
 yarn-error.log
-.npm
 
-# Docker files
-.dockerignore
+# App build output
+app/dist/
+app/build/
+
+# Docker
 docker-compose.override.yml
 
 # Environment files
@@ -64,32 +46,19 @@ docker-compose.override.yml
 .env.local
 .env.*.local
 
-# OS files
-.DS_Store
-.AppleDouble
-.LSOverride
-*.swp
-*.swo
-*~
-.directory
-ehthumbs.db
-desktop.ini
-
-# Monitoring files
+# Monitoring logs
 monitoring/logs/
 monitoring/*.log
 
-# Application files
-app/node_modules/
-app/dist/
-app/build/
-app/.env.local
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
 
 # Misc
+*.log
+*.bak
+*.backup
 .cache/
 temp/
 tmp/
-*.bak
-*.backup
-.history/
-**/
