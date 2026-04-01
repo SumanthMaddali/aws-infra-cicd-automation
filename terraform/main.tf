@@ -67,3 +67,128 @@ resource "aws_route_table_association" "public" {
   subnet_id = aws_subnet.public.id
   route_table_id = aws_route_table.public.id
 }
+
+
+#Security group - Jenkins
+resource "aws_security_group" "jenkins" {
+  name = "jenkins-sg"
+  description = "Security group for Jenkins server"
+  vpc_id = aws_vpc.main.id
+
+  ingress = [
+    {
+        description = "Jenkins UI"
+        from_port = 8080
+        to_port = 8080
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    },
+    {
+        description = "SSH access"
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
+
+  egress = [
+    {
+        from_port = 0
+        to_port = 0
+        protocol = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
+
+  tags = {
+    Name = "jenkins-sg"
+  }
+}
+
+#Security group - App server
+resource "aws_security_group" "app" {
+  name = "app-sg"
+  description = "security group for app server"
+  vpc_id = aws_vpc.main.id
+
+  ingress = [
+    {
+        description = "App port"
+        from_port = 3000
+        to_port = 3000
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    },
+    {
+        description = "SSH access"
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    },
+    {
+        description = "Node exporter for Prometheus"
+        from_port   = 9100
+        to_port     = 9100
+        protocol    = "tcp"
+        cidr_blocks = ["10.0.0.0/16"]
+    }
+  ]
+
+  egress = [
+    {
+        from_port   = 0
+        to_port     = 0
+        protocol    = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
+
+  tags = {
+    Name = "app-sg"
+  }
+}
+
+resource "aws_security_group" "monitoring" {
+  name        = "monitoring-sg"
+  description = "Security group for Prometheus and Grafana"
+  vpc_id      = aws_vpc.main.id
+
+  ingress = [
+    {
+        description = "Grafana UI"
+        from_port   = 3000
+        to_port     = 3000
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    },
+    {
+        description = "Prometheus UI"
+        from_port   = 9090
+        to_port     = 9090
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    },
+    {
+        description = "SSH access"
+        from_port   = 22
+        to_port     = 22
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+]
+
+  egress = [
+    {
+        from_port   = 0
+        to_port     = 0
+        protocol    = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+]
+
+  tags = {
+    Name = "monitoring-sg"
+  }
+}
