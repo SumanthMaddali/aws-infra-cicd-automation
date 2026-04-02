@@ -234,3 +234,58 @@ resource "aws_iam_instance_profile" "jenkins_profile" {
   name = "jenkins-instance-profile"
   role = aws_iam_role.jenkins_role.name
 }
+
+# EC2 - Jenkins Server
+resource "aws_instance" "jenkins" {
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
+  subnet_id              = aws_subnet.public.id
+  key_name               = aws_key_pair.devops_key.key_name
+  vpc_security_group_ids = [aws_security_group.jenkins.id]
+  iam_instance_profile   = aws_iam_instance_profile.jenkins_profile.name
+
+  root_block_device {
+    volume_size = 20
+    volume_type = "gp2"
+  }
+
+  tags = {
+    Name = "jenkins-server"
+  }
+}
+
+# EC2 - App Server
+resource "aws_instance" "app" {
+  ami = var.ami_id
+  instance_type = var.instance_type
+  subnet_id = aws_subnet.public.id
+  key_name = aws_key_pair.devops_key.key_name
+  vpc_security_group_ids = [aws_security_group.app.id]
+
+  root_block_device {
+    volume_size = 15
+    volume_type = "gp2"
+  }
+
+  tags = {
+    Name = "app-server"
+  }
+}
+
+# EC2 - Monitoring Server
+resource "aws_instance" "monitoring" {
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
+  subnet_id              = aws_subnet.public.id
+  key_name               = aws_key_pair.devops_key.key_name
+  vpc_security_group_ids = [aws_security_group.monitoring.id]
+
+  root_block_device {
+    volume_size = 15
+    volume_type = "gp2"
+  }
+
+  tags = {
+    Name = "monitoring-server"
+  }
+}
