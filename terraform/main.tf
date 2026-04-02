@@ -52,7 +52,7 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
-  route = {
+  route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
@@ -75,31 +75,29 @@ resource "aws_security_group" "jenkins" {
   description = "Security group for Jenkins server"
   vpc_id = aws_vpc.main.id
 
-  ingress = [
-    {
-        description = "Jenkins UI"
-        from_port = 8080
-        to_port = 8080
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    },
-    {
-        description = "SSH access"
-        from_port = 22
-        to_port = 22
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-  ]
+  ingress {
+    description      = "Jenkins UI"
+    from_port        = 8080
+    to_port          = 8080
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
 
-  egress = [
-    {
-        from_port = 0
-        to_port = 0
-        protocol = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-  ]
+  ingress {
+    description      = "SSH access"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description      = "Allow all outbound"
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
 
   tags = {
     Name = "jenkins-sg"
@@ -112,38 +110,37 @@ resource "aws_security_group" "app" {
   description = "security group for app server"
   vpc_id = aws_vpc.main.id
 
-  ingress = [
-    {
-        description = "App port"
-        from_port = 3000
-        to_port = 3000
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    },
-    {
-        description = "SSH access"
-        from_port = 22
-        to_port = 22
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    },
-    {
-        description = "Node exporter for Prometheus"
-        from_port   = 9100
-        to_port     = 9100
-        protocol    = "tcp"
-        cidr_blocks = ["10.0.0.0/16"]
-    }
-  ]
+  ingress {
+    description = "App port"
+    from_port = 3000
+    to_port = 3000
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]    
+  }
+  
+  ingress {
+    description      = "SSH access"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
 
-  egress = [
-    {
-        from_port   = 0
-        to_port     = 0
-        protocol    = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-  ]
+  ingress {
+    description      = "Node exporter for Prometheus"
+    from_port        = 9100
+    to_port          = 9100
+    protocol         = "tcp"
+    cidr_blocks      = ["10.0.0.0/16"]
+  }
+
+  egress {
+    description      = "Allow all outbound"
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
 
   tags = {
     Name = "app-sg"
@@ -155,38 +152,37 @@ resource "aws_security_group" "monitoring" {
   description = "Security group for Prometheus and Grafana"
   vpc_id      = aws_vpc.main.id
 
-  ingress = [
-    {
-        description = "Grafana UI"
-        from_port   = 3000
-        to_port     = 3000
-        protocol    = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    },
-    {
-        description = "Prometheus UI"
-        from_port   = 9090
-        to_port     = 9090
-        protocol    = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    },
-    {
-        description = "SSH access"
-        from_port   = 22
-        to_port     = 22
-        protocol    = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-]
+  ingress {
+    description      = "Grafana UI"
+    from_port        = 3000
+    to_port          = 3000
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
 
-  egress = [
-    {
-        from_port   = 0
-        to_port     = 0
-        protocol    = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-]
+  ingress {
+    description      = "Prometheus UI"
+    from_port        = 9090
+    to_port          = 9090
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description      = "SSH access"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description      = "Allow all outbound"
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
 
   tags = {
     Name = "monitoring-sg"
