@@ -192,3 +192,45 @@ resource "aws_security_group" "monitoring" {
     Name = "monitoring-sg"
   }
 }
+
+#ECR repo to store docker images
+resource "aws_ecr_repository" "app" {
+  name = "zomato-clone"
+  image_tag_mutability = "MUTABLE" #Able to push new images with same tag
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  tags = {
+    Name = "zomato-clone-ecr"
+  }
+}
+
+# IAM Role - allows Jenkins EC2 to push to ECR
+resource "aws_iam_role" "jenkins_role" {
+  name = "jenkins-ecr-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "jenkins_ecr" {
+  role       = aws_iam_role.jenkins_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
+}
+
+resource "aws_iam_instance_profile" "jenkins_profile" {
+  name = "jenkins-instance-profile"
+  role = aws_iam_role.jenkins_role.name
+}
