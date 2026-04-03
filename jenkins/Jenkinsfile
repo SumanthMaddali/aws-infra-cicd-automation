@@ -7,6 +7,7 @@ pipeline {
         ECR_REPOSITORY    = 'zomato-clone'
         IMAGE_TAG         = "${BUILD_NUMBER}"
         APP_SERVER_IP     = '3.109.214.76'
+        APP_REPO          = 'https://github.com/SumanthMaddali/zomato-clone.git'
     }
 
     stages {
