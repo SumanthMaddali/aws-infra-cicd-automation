@@ -13,8 +13,18 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                echo 'Cloning repository...'
+                echo 'Cloning infrastructure repository...'
                 checkout scm
+            }
+        }
+
+        stage('Clone App Repo') {
+            steps {
+                echo 'Cloning application repository...'
+                sh """
+                    rm -rf app-source
+                    git clone ${APP_REPO} app-source
+                """
             }
         }
 
@@ -22,7 +32,10 @@ pipeline {
             steps {
                 echo 'Building Docker image...'
                 script {
-                    dockerImage = docker.build("${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}")
+                    dockerImage = docker.build(
+                        "${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}",
+                        "./app-source"
+                    )
                 }
             }
         }
@@ -95,6 +108,7 @@ pipeline {
         always {
             echo 'Cleaning up local Docker images...'
             sh "docker rmi ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} || true"
+            sh "rm -rf app-source || true"
         }
     }
 }
