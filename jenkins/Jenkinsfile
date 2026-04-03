@@ -1,0 +1,100 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION        = 'ap-south-1'
+        ECR_REGISTRY      = '793439287334.dkr.ecr.ap-south-1.amazonaws.com'
+        ECR_REPOSITORY    = 'zomato-clone'
+        IMAGE_TAG         = "${BUILD_NUMBER}"
+        APP_SERVER_IP     = '3.109.214.76'
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                echo 'Cloning repository...'
+                checkout scm
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                echo 'Building Docker image...'
+                script {
+                    dockerImage = docker.build("${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}")
+                }
+            }
+        }
+
+        stage('Push to ECR') {
+            steps {
+                echo 'Pushing image to AWS ECR...'
+                script {
+                    withAWS(credentials: 'aws-credentials', region: AWS_REGION) {
+                        sh """
+                            aws ecr get-login-password --region ${AWS_REGION} | \
+                            docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                        """
+                        sh "docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+                        sh "docker tag ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest"
+                        sh "docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to App Server') {
+            steps {
+                echo 'Deploying to app server...'
+                script {
+                    withAWS(credentials: 'aws-credentials', region: AWS_REGION) {
+                        def loginCmd = sh(
+                            script: "aws ecr get-login-password --region ${AWS_REGION}",
+                            returnStdout: true
+                        ).trim()
+
+                        sshagent(['app-server-ssh']) {
+                            sh """
+                                ssh -o StrictHostKeyChecking=no ubuntu@${APP_SERVER_IP} '
+                                    docker login --username AWS --password ${loginCmd} ${ECR_REGISTRY} &&
+                                    docker pull ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest &&
+                                    docker stop zomato-clone || true &&
+                                    docker rm zomato-clone || true &&
+                                    docker run -d \
+                                        --name zomato-clone \
+                                        --restart unless-stopped \
+                                        -p 3000:3000 \
+                                        ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
+                                '
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                echo 'Running health check...'
+                script {
+                    sleep(10)
+                    sh "curl -f http://${APP_SERVER_IP}:3000 || exit 1"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Deployment successful! App running at http://${APP_SERVER_IP}:3000"
+        }
+        failure {
+            echo "❌ Pipeline failed! Check logs above for details."
+        }
+        always {
+            echo 'Cleaning up local Docker images...'
+            sh "docker rmi ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} || true"
+        }
+    }
+}
