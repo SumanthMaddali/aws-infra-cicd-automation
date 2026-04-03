@@ -91,6 +91,14 @@ resource "aws_security_group" "jenkins" {
     cidr_blocks      = ["0.0.0.0/0"]
   }
 
+  ingress {
+    description = "Node exporter for Prometheus"
+    from_port   = 9100
+    to_port     = 9100
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
   egress {
     description      = "Allow all outbound"
     from_port        = 0
